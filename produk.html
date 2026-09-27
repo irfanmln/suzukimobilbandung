@@ -324,8 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const SB_URL='https://jglkpcywzmmaetbxwllr.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnbGtwY3l3em1tYWV0Ynh3bGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTUyMjEsImV4cCI6MjA4ODg3MTIyMX0.7qL9gfM6Gjy5wBgxdlxqiW5-TXzwcOBpRcmskZw0jYQ';
+const API_BASE='/api';
 
 function toggleMenu(){document.getElementById('navMobile').classList.toggle('open');}
 document.addEventListener('click',function(e){
@@ -349,7 +348,7 @@ async function submitTestDrive(){
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
     const record={nama,no_hp:hp,tipe_mobil:mobil,tanggal:hari,email:''};
-    await fetch(SB_URL+'/rest/v1/test_drive',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},body:JSON.stringify(record)});
+    await fetch('/api/test-drive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'INSERT',table:'test_drive',record})}).catch(()=>{});
     document.getElementById('testDriveForm').style.display='none';
     document.getElementById('testDriveSuccess').style.display='block';
@@ -364,7 +363,7 @@ async function submitKredit(){
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
     const record={nama,no_hp:hp,tipe_mobil:document.getElementById('kr_mobil').value,tenor:document.getElementById('kr_tenor').value,uang_muka:document.getElementById('kr_dp').value?parseInt(document.getElementById('kr_dp').value):null,asal_kota:document.getElementById('kr_domisili').value.trim()};
-    await fetch(SB_URL+'/rest/v1/simulasi_kredit',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},body:JSON.stringify(record)});
+    await fetch('/api/simulasi-kredit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'INSERT',table:'simulasi_kredit',record})}).catch(()=>{});
     document.getElementById('kreditForm').style.display='none';
     document.getElementById('kreditSuccess').style.display='block';

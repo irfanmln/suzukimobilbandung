@@ -580,8 +580,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const SB_URL='https://jglkpcywzmmaetbxwllr.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnbGtwY3l3em1tYWV0Ynh3bGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTUyMjEsImV4cCI6MjA4ODg3MTIyMX0.7qL9gfM6Gjy5wBgxdlxqiW5-TXzwcOBpRcmskZw0jYQ';
+const API_BASE='/api';
 
 // HAMBURGER
 function toggleMenu(){
@@ -621,12 +620,10 @@ function changeSlide(dir){current=(current+dir+total)%total;updateSlider();reset
 function goSlide(n){current=n;updateSlider();resetAuto();}
 function resetAuto(){clearInterval(autoTimer);autoTimer=setInterval(()=>changeSlide(1),5000);}
 
-// Load hero banners from Supabase
+// Load hero banners from D1 API (pengganti Supabase)
 async function loadHeroBanners(){
   try{
-    const r=await fetch(SB_URL+'/rest/v1/hero_banners?is_active=eq.true&order=sort_order,id&select=*',{
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-    });
+    const r=await fetch('/api/hero-banners?active=true');
     const banners=await r.json();
     if(!banners||!banners.length){initSlider();return;}
     // Replace placeholder slide with actual banners
@@ -689,9 +686,9 @@ async function submitTestDrive(){
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
     const record={nama,no_hp:hp,tipe_mobil:mobil,tanggal:hari,email:''};
-    await fetch(SB_URL+'/rest/v1/test_drive',{
+    await fetch('/api/test-drive',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify(record)
     });
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'INSERT',table:'test_drive',record})}).catch(()=>{});
@@ -716,9 +713,9 @@ async function submitKredit(){
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
     const record={nama,no_hp:hp,tipe_mobil:mobil,tenor,uang_muka:dp?parseInt(dp):null,asal_kota:document.getElementById('kr_domisili').value.trim()};
-    await fetch(SB_URL+'/rest/v1/simulasi_kredit',{
+    await fetch('/api/simulasi-kredit',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify(record)
     });
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'INSERT',table:'simulasi_kredit',record})}).catch(()=>{});
@@ -731,13 +728,11 @@ async function submitKredit(){
   }
 }
 
-// Load delivery photos
+// Load delivery photos from D1 API (pengganti Supabase)
 async function loadDeliveryPhotos(){
   const grid=document.getElementById('deliveryGrid');
   try{
-    const r=await fetch(SB_URL+'/rest/v1/delivery_photos?order=sort_order,id&select=*',{
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-    });
+    const r=await fetch('/api/delivery-photos');
     const rows=await r.json();
     if(!rows||!rows.length){
       grid.innerHTML='<div class="delivery-empty">Belum ada foto delivery.</div>';

@@ -1,0 +1,42 @@
+# ============================================================
+# Cloudflare Pages + D1 + R2 - suzukimobilbandung
+# Pengganti Supabase (tidak ada auto-pause 14 hari)
+# ============================================================
+name = "suzukimobilbandung"
+compatibility_date = "2024-09-01"
+
+# --- Static site: root folder ini yang di-deploy ke Pages ---
+# Build command: (none, static HTML)
+# Build output directory: /
+
+[vars]
+# Public base URL file R2. Ganti setelah buat R2 custom domain.
+# Contoh: https://cdn.suzukimobilbandung.com
+# Sementara bisa pakai dev URL: https://pub-xxx.r2.dev
+R2_PUBLIC_URL = "https://pub-xxx.r2.dev"
+
+# Token sederhana untuk proteksi endpoint admin (tulis/hapus/list leads).
+# Isi di dashboard Pages -> Settings -> Environment Variables.
+# Frontend admin akan mengirim header Authorization: Bearer <token>.
+# Jika dikosongkan, endpoint admin terbuka (mode dev saja!).
+# ADMIN_API_TOKEN = ""
+
+# --- D1 database ---
+# 1. npx wrangler d1 create suzukimobilbandung-db
+# 2. copy database_id yang keluar ke bawah ini
+# 3. npx wrangler d1 execute suzukimobilbandung-db --file=./schema-d1.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "suzukimobilbandung-db"
+database_id = "isi-database-id-dari-wrangler-d1-create"
+
+# --- R2 bucket untuk gambar (pengganti Supabase Storage) ---
+# 1. npx wrangler r2 bucket create suzukimobilbandung-images
+# 2. Aktifkan public access / custom domain untuk URL publik
+# Struktur prefix di dalam bucket:
+#   delivery-photos/<file>
+#   hero-banners/<file>
+#   product-images/<slug>/<file>
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "suzukimobilbandung-images"

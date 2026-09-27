@@ -348,8 +348,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="toast" id="toast"></div>
 
 <script>
-const SB='https://jglkpcywzmmaetbxwllr.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnbGtwY3l3em1tYWV0Ynh3bGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTUyMjEsImV4cCI6MjA4ODg3MTIyMX0.7qL9gfM6Gjy5wBgxdlxqiW5-TXzwcOBpRcmskZw0jYQ';
+const API_BASE='/api';
+const ADMIN_TOKEN = localStorage.getItem('suzuki_admin_token') || '';
 const ADMIN_EMAIL='admin@suzukigedebage.com';
 const ADMIN_PASS='suzuki2026';
 const SALES_EMAIL='sales@suzukigedebage.com';
@@ -371,10 +371,22 @@ function toast(msg,ok=true){
 
 async function api(path,opts={}){
   const {headers:extraHeaders,...restOpts}=opts;
-  return fetch(SB+path,{
-    headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json',...(extraHeaders||{})},
-    ...restOpts
-  });
+  const h={'Content-Type':'application/json',...(extraHeaders||{})};
+  if(ADMIN_TOKEN)h['Authorization']='Bearer '+ADMIN_TOKEN;
+  if(path.startsWith('/rest/v1/'))path=path.replace('/rest/v1/','/api/');
+  const url=path.startsWith('/api/')?path:API_BASE+path;
+  return fetch(url,{headers:h,...restOpts});
+}
+async function uploadFile(file,prefix){
+  const fd=new FormData();fd.append('file',file);fd.append('prefix',prefix);
+  const h={};if(ADMIN_TOKEN)h['Authorization']='Bearer '+ADMIN_TOKEN;
+  const r=await fetch('/api/upload',{method:'POST',headers:h,body:fd});
+  if(!r.ok)throw new Error('Upload gagal: '+r.status);
+  return r.json();
+}
+function r2keyFromUrl(imageUrl,marker){
+  const parts=imageUrl.split('/'+marker+'/');
+  return parts.length>1?parts[1].split('?')[0]:'';
 }
 
 function doLogin(){
@@ -443,7 +455,7 @@ async function loadDeliveryPhotos(){
   const el=document.getElementById('deliveryPhotoList');
   el.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">Memuat...</div>';
   try{
-    const r=await api('/rest/v1/delivery_photos?order=sort_order,id&select=*');
+    const r=await api('/api/delivery-photos');
     const rows=await r.json();
     if(!rows.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">Belum ada foto. Upload di atas.</div>';return;}
     el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">'+
@@ -464,21 +476,12 @@ async function uploadDeliveryPhoto(){
   const order=parseInt(document.getElementById('deliveryOrder').value)||0;
   const status=document.getElementById('deliveryUploadStatus');
   if(!file){status.innerHTML='<span style="color:red;">Pilih file gambar terlebih dahulu.</span>';return;}
-  status.innerHTML='<span style="color:#888;">Mengupload...</span>';
+  status.innerHTML='<span style="color:#888;">Mengupload ke R2...</span>';
   try{
-    const ext=file.name.split('.').pop();
-    const fname='delivery-'+Date.now()+'.'+ext;
-    const upRes=await fetch(SB+'/storage/v1/object/delivery-photos/'+fname,{
+    const {url}=await uploadFile(file,'delivery-photos');
+    const insRes=await api('/api/delivery-photos',{
       method:'POST',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':file.type,'x-upsert':'true'},
-      body:file
-    });
-    if(!upRes.ok)throw new Error('Upload gagal: '+upRes.status);
-    const imageUrl=SB+'/storage/v1/object/public/delivery-photos/'+fname;
-    const insRes=await fetch(SB+'/rest/v1/delivery_photos',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
-      body:JSON.stringify({image_url:imageUrl,sort_order:order})
+      body:JSON.stringify({image_url:url,sort_order:order})
     });
     if(!insRes.ok)throw new Error('Simpan data gagal');
     status.innerHTML='<span style="color:green;">✓ Foto berhasil diupload!</span>';
@@ -491,13 +494,8 @@ async function uploadDeliveryPhoto(){
 async function deleteDeliveryPhoto(id,imageUrl){
   if(!confirm('Hapus foto ini?'))return;
   try{
-    const fname=imageUrl.split('/delivery-photos/').pop();
-    await fetch(SB+'/storage/v1/object/delivery-photos/'+fname,{
-      method:'DELETE',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
-    await fetch(SB+'/rest/v1/delivery_photos?id=eq.'+id,{
-      method:'DELETE',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
+    const key=r2keyFromUrl(imageUrl,'delivery-photos');
+    await api('/api/delivery-photos?id='+id+(key?'&key='+encodeURIComponent('delivery-photos/'+key):''),{method:'DELETE'});
     loadDeliveryPhotos();
   }catch(e){alert('Gagal menghapus: '+e.message);}
 }
@@ -508,7 +506,7 @@ async function loadHeroBanners(){
   const el=document.getElementById('heroBannerList');
   el.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">Memuat...</div>';
   try{
-    const r=await api('/rest/v1/hero_banners?order=sort_order,id&select=*');
+    const r=await api('/api/hero-banners');
     const rows=await r.json();
     if(!rows.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">Belum ada banner. Upload gambar di atas.</div>';return;}
     el.innerHTML=rows.map(b=>`
@@ -528,23 +526,13 @@ async function uploadHeroBanner(){
   const order=parseInt(document.getElementById('heroBannerOrder').value)||0;
   const status=document.getElementById('heroUploadStatus');
   if(!file){status.innerHTML='<span style="color:red;">Pilih file gambar terlebih dahulu.</span>';return;}
-  status.innerHTML='<span style="color:#888;">Mengupload...</span>';
+  status.innerHTML='<span style="color:#888;">Mengupload ke R2...</span>';
   try{
-    // Upload to Supabase Storage bucket "hero-banners"
-    const ext=file.name.split('.').pop();
-    const fname='banner-'+Date.now()+'.'+ext;
-    const upRes=await fetch(SB+'/storage/v1/object/hero-banners/'+fname,{
-      method:'POST',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':file.type,'x-upsert':'true'},
-      body:file
-    });
-    if(!upRes.ok)throw new Error('Upload gagal: '+upRes.status);
-    const imageUrl=SB+'/storage/v1/object/public/hero-banners/'+fname;
+    const {url:imageUrl}=await uploadFile(file,'hero-banners');
     // Insert record
-    const insRes=await fetch(SB+'/rest/v1/hero_banners',{
+    const insRes=await api('/api/hero-banners',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
-      body:JSON.stringify({image_url:imageUrl,sort_order:order,is_active:true})
+      body:JSON.stringify({image_url:imageUrl,sort_order:order})
     });
     if(!insRes.ok)throw new Error('Simpan data gagal');
     status.innerHTML='<span style="color:green;">✓ Banner berhasil diupload!</span>';
@@ -557,17 +545,8 @@ async function uploadHeroBanner(){
 async function deleteHeroBanner(id,imageUrl){
   if(!confirm('Hapus banner ini?'))return;
   try{
-    // Delete storage file
-    const fname=imageUrl.split('/hero-banners/').pop();
-    await fetch(SB+'/storage/v1/object/hero-banners/'+fname,{
-      method:'DELETE',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
-    // Delete DB record
-    await fetch(SB+'/rest/v1/hero_banners?id=eq.'+id,{
-      method:'DELETE',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
+    const key=r2keyFromUrl(imageUrl,'hero-banners');
+    await api('/api/hero-banners?id='+id+(key?'&key='+encodeURIComponent('hero-banners/'+key):''),{method:'DELETE'});
     loadHeroBanners();
   }catch(e){alert('Gagal menghapus: '+e.message);}
 }
@@ -590,7 +569,7 @@ async function renderCarGrid(){
   const grid=document.getElementById('carGrid');
   grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa;">Memuat data...</div>';
   try{
-    const r=await api('/rest/v1/product_images?select=*');
+    const r=await api('/api/product-images');
     const rows=await r.json();
     const bySlug={};
     rows.forEach(row=>bySlug[row.car_slug]=row);
@@ -624,20 +603,11 @@ async function uploadProductImage(slug,type){
   const file=fileInput.files[0];
   const status=document.getElementById(`status-${slug}-${type}`);
   if(!file){status.innerHTML='<span style="color:red;">Pilih file dulu.</span>';return;}
-  status.innerHTML='<span style="color:#888;">Mengupload...</span>';
+  status.innerHTML='<span style="color:#888;">Mengupload ke R2...</span>';
   try{
-    const ext=file.name.split('.').pop();
-    const fname=`${slug}/${type}-${Date.now()}.${ext}`;
-    const upRes=await fetch(SB+'/storage/v1/object/product-images/'+fname,{
+    const {url:imageUrl}=await uploadFile(file,'product-images/'+slug);
+    const upsertRes=await api('/api/product-images',{
       method:'POST',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':file.type,'x-upsert':'true'},
-      body:file
-    });
-    if(!upRes.ok)throw new Error('Upload gagal: '+upRes.status);
-    const imageUrl=SB+'/storage/v1/object/public/product-images/'+fname;
-    const upsertRes=await fetch(SB+'/rest/v1/product_images?on_conflict=car_slug',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'resolution=merge-duplicates'},
       body:JSON.stringify({car_slug:slug,['img_'+type]:imageUrl})
     });
     if(!upsertRes.ok)throw new Error('Simpan data gagal');
@@ -652,7 +622,7 @@ async function loadColorPage(){
   const el=document.getElementById('colorCarList');
   el.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">Memuat data...</div>';
   try{
-    const r=await api('/rest/v1/color_variants?order=car_slug,sort_order,id&select=*');
+    const r=await api('/api/color-variants');
     const rows=await r.json();
     const bySlug={};
     CARS.forEach(car=>bySlug[car.slug]=[]);
@@ -694,20 +664,11 @@ async function addColorVariant(slug){
   const file=document.getElementById(`color-file-${slug}`).files[0];
   const status=document.getElementById(`color-status-${slug}`);
   if(!name||!file){status.innerHTML='<span style="color:red;">Nama warna dan foto wajib diisi.</span>';return;}
-  status.innerHTML='<span style="color:#888;">Menyimpan...</span>';
+  status.innerHTML='<span style="color:#888;">Menyimpan ke R2...</span>';
   try{
-    const ext=file.name.split('.').pop();
-    const fname=`${slug}/color-${Date.now()}.${ext}`;
-    const upRes=await fetch(SB+'/storage/v1/object/product-images/'+fname,{
+    const {url:imageUrl}=await uploadFile(file,'product-images/'+slug);
+    const insRes=await api('/api/color-variants',{
       method:'POST',
-      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':file.type,'x-upsert':'true'},
-      body:file
-    });
-    if(!upRes.ok)throw new Error('Upload gagal: '+upRes.status);
-    const imageUrl=SB+'/storage/v1/object/public/product-images/'+fname;
-    const insRes=await fetch(SB+'/rest/v1/color_variants',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
       body:JSON.stringify({car_slug:slug,variant_group:group,color_name:name,hex_color:hex,image_url:imageUrl,sort_order:order})
     });
     if(!insRes.ok)throw new Error('Simpan data gagal');
@@ -719,13 +680,8 @@ async function addColorVariant(slug){
 async function deleteColorVariant(id,imageUrl){
   if(!confirm('Hapus warna ini?'))return;
   try{
-    const fname=imageUrl.split('/product-images/').pop();
-    await fetch(SB+'/storage/v1/object/product-images/'+fname,{
-      method:'DELETE',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
-    await fetch(SB+'/rest/v1/color_variants?id=eq.'+id,{
-      method:'DELETE',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
-    });
+    const key=r2keyFromUrl(imageUrl,'product-images');
+    await api('/api/color-variants?id='+id+(key?'&key='+encodeURIComponent('product-images/'+key):''),{method:'DELETE'});
     loadColorPage();
   }catch(e){alert('Gagal menghapus: '+e.message);}
 }
@@ -733,7 +689,7 @@ async function deleteColorVariant(id,imageUrl){
 
 // ── UPDATE OTR ────────────────────────────────────────────
 // Catatan: harga OTR di halaman produk publik masih hardcoded di HTML.
-// Tombol ini menyimpan perubahan ke tabel otr_prices di Supabase,
+// Tombol ini menyimpan perubahan ke tabel otr_prices di D1 (pengganti Supabase),
 // tapi belum otomatis tampil di halaman produk (perlu wiring terpisah).
 async function saveOTR(slug){
   const tipeInputs=document.querySelectorAll(`.otr-input[data-slug="${slug}"]:not(.otr-price)`);
@@ -743,9 +699,8 @@ async function saveOTR(slug){
     return {car_slug:slug,idx:parseInt(idx),tipe:input.value.trim(),harga:priceInput?priceInput.value.trim():''};
   });
   try{
-    const res=await fetch(SB+'/rest/v1/otr_prices?on_conflict=car_slug,idx',{
+    const res=await api('/api/otr-prices',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'resolution=merge-duplicates'},
       body:JSON.stringify(rows)
     });
     if(!res.ok)throw new Error('Simpan gagal: '+res.status);
@@ -757,18 +712,22 @@ async function saveOTR(slug){
 async function loadDashboard(){
   try{
     const [r1,r2]=await Promise.all([
-      api('/rest/v1/test_drive?select=*&order=id.desc&limit=5'),
-      api('/rest/v1/simulasi_kredit?select=*&order=id.desc&limit=5')
-    ]);
-    const [r3,r4]=await Promise.all([
-      api('/rest/v1/test_drive?select=id',{headers:{'Prefer':'count=exact'}}),
-      api('/rest/v1/simulasi_kredit?select=id',{headers:{'Prefer':'count=exact'}})
+      api('/api/test-drive?limit=5'),
+      api('/api/simulasi-kredit?limit=5')
     ]);
     const td=await r1.json(),sim=await r2.json();
-    const tdCount=r3.headers.get('content-range')?.split('/')[1]??td.length;
-    const simCount=r4.headers.get('content-range')?.split('/')[1]??sim.length;
-    document.getElementById('statTD').textContent=tdCount;
-    document.getElementById('statSim').textContent=simCount;
+    // D1 API tidak pakai content-range seperti Supabase; pakai length + full count async
+    const tdCount=td.length;
+    const simCount=sim.length;
+    try{
+      const [c1,c2]=await Promise.all([api('/api/test-drive?limit=5000'),api('/api/simulasi-kredit?limit=5000')]);
+      const [allTD,allSim]=await Promise.all([c1.json(),c2.json()]);
+      document.getElementById('statTD').textContent=allTD.length;
+      document.getElementById('statSim').textContent=allSim.length;
+    }catch(_){
+      document.getElementById('statTD').textContent=tdCount;
+      document.getElementById('statSim').textContent=simCount;
+    }
     document.getElementById('tbodyTD').innerHTML=td.length
       ?td.map(r=>`<tr><td>${h(r.nama)}</td><td>${h(r.no_hp)}</td><td>${h(r.tipe_mobil)}</td><td>${fmtDate(r.tanggal)}</td></tr>`).join('')
       :'<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px;">Belum ada data</td></tr>';
@@ -779,7 +738,7 @@ async function loadDashboard(){
 }
 
 async function loadTDFull(){
-  const r=await api('/rest/v1/test_drive?select=*&order=id.desc');
+  const r=await api('/api/test-drive');
   tdData=await r.json();
   document.getElementById('tbodyTDFull').innerHTML=tdData.length
     ?tdData.map(r=>`<tr><td>${h(r.nama)}</td><td>${h(r.no_hp)}</td><td>${h(r.tipe_mobil)}</td><td>${fmtDate(r.tanggal)}</td></tr>`).join('')
@@ -787,7 +746,7 @@ async function loadTDFull(){
 }
 
 async function loadSimFull(){
-  const r=await api('/rest/v1/simulasi_kredit?select=*&order=id.desc');
+  const r=await api('/api/simulasi-kredit');
   simData=await r.json();
   document.getElementById('tbodySimFull').innerHTML=simData.length
     ?simData.map(r=>`<tr><td>${h(r.nama)}</td><td>${h(r.no_hp)}</td><td>${h(r.tipe_mobil)}</td><td>${h(r.tenor)}</td><td>${fmtRp(r.uang_muka)}</td><td>${h(r.asal_kota)}</td></tr>`).join('')

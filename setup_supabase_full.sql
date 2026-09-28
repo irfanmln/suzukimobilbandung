@@ -1,5 +1,5 @@
 -- ============================================================
--- SETUP LENGKAP SUPABASE - SUZUKI NJS GEDEBAGE
+-- SETUP LENGKAP SUPABASE - SUZUKI NJS NARIPAN
 -- Jalankan SQL ini di: Supabase Dashboard → SQL Editor
 -- ============================================================
 

@@ -1,5 +1,5 @@
 -- ============================================================
--- SETUP SUPABASE UNTUK SUZUKI GEDEBAGE
+-- SETUP SUPABASE UNTUK SUZUKI NARIPAN
 -- Jalankan SQL ini di: Supabase Dashboard → SQL Editor
 -- ============================================================
 

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     let notifText = '';
 
     if (table === 'test_drive') {
-      subject = '🚗 Lead Baru: Test Drive - Suzuki NJS Gedebage';
+      subject = '🚗 Lead Baru: Test Drive - Suzuki NJS Naripan';
       notifText = `🚗 *Lead Baru: Test Drive*\nNama: ${record.name || record.nama || '-'}\nNo. HP: ${record.no_hp || record.phone || record.whatsapp || '-'}\nMobil: ${record.mobil || record.tipe_mobil || record.car || '-'}\nTanggal: ${record.tanggal || record.jadwal || '-'}`;
       htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -52,12 +52,12 @@ export default async function handler(req, res) {
             </table>
           </div>
           <div style="background: #1a56db; padding: 14px; text-align: center;">
-            <p style="color: white; margin: 0; font-size: 13px;">Suzuki NJS Gedebage · suzukigedebage.com</p>
+            <p style="color: white; margin: 0; font-size: 13px;">Suzuki NJS Naripan · suzukinaripan.com</p>
           </div>
         </div>
       `;
     } else if (table === 'simulasi_kredit') {
-      subject = '💰 Lead Baru: Simulasi Kredit - Suzuki NJS Gedebage';
+      subject = '💰 Lead Baru: Simulasi Kredit - Suzuki NJS Naripan';
       notifText = `💰 *Lead Baru: Simulasi Kredit*\nNama: ${record.name || record.nama || '-'}\nNo. HP: ${record.no_hp || record.phone || record.whatsapp || '-'}\nMobil: ${record.mobil || record.tipe_mobil || record.car || '-'}\nDP: ${record.dp || record.uang_muka || '-'}\nTenor: ${record.tenor ? record.tenor + ' bulan' : '-'}\nDomisili: ${record.asal_kota || record.domisili || '-'}`;
       htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -101,7 +101,7 @@ export default async function handler(req, res) {
             </table>
           </div>
           <div style="background: #1a56db; padding: 14px; text-align: center;">
-            <p style="color: white; margin: 0; font-size: 13px;">Suzuki NJS Gedebage · suzukigedebage.com</p>
+            <p style="color: white; margin: 0; font-size: 13px;">Suzuki NJS Naripan · suzukinaripan.com</p>
           </div>
         </div>
       `;

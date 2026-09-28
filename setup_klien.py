@@ -39,16 +39,16 @@ HTML_FILES = [
     'new-carry-pick-up.html',
 ]
 
-# ─── Nilai lama (dealer Gedebage) ────────────────────────
+# ─── Nilai lama (dealer Naripan) ────────────────────────
 OLD_VALUES = {
     'sb_url':       'https://jglkpcywzmmaetbxwllr.supabase.co',
     'sb_key':       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnbGtwY3l3em1tYWV0Ynh3bGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTUyMjEsImV4cCI6MjA4ODg3MTIyMX0.7qL9gfM6Gjy5wBgxdlxqiW5-TXzwcOBpRcmskZw0jYQ',
-    'wa_number':    '6285173340806',
-    'dealer_name':  'Suzuki Gedebage Bandung',
-    'dealer_addr':  'Jl. Soekarno-Hatta No.700, Cipamokolan, Kec. Rancasari, Kota Bandung, Jawa Barat 40292',
-    'dealer_email': 'suzukigedebage@gmail.com',
-    'dealer_phone': '+62 851-7334-0806',
-    'logo_url':     'https://suzukigedebage.com/wp-content/uploads/2025/06/logo-suzuki-300x57.webp',
+    'wa_number':    '6282218825857',
+    'dealer_name':  'Suzuki Naripan Bandung',
+    'dealer_addr':  'Jl. Naripan No.68, Kb. Pisang, Kec. Sumur Bandung, Kota Bandung, Jawa Barat 40112',
+    'dealer_email': 'iwansugianto882@gmail.com',
+    'dealer_phone': '+62 822-1882-5857',
+    'logo_url':     'https://suzukinaripan.com/wp-content/uploads/2025/06/logo-suzuki-300x57.webp',
 }
 
 def get_input(label, old_value):

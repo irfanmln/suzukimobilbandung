@@ -48,7 +48,7 @@ OLD_VALUES = {
     'dealer_addr':  'Jl. Naripan No.68, Kb. Pisang, Kec. Sumur Bandung, Kota Bandung, Jawa Barat 40112',
     'dealer_email': 'iwansugianto882@gmail.com',
     'dealer_phone': '+62 822-1882-5857',
-    'logo_url':     'https://suzukinaripan.com/wp-content/uploads/2025/06/logo-suzuki-300x57.webp',
+    'logo_url':     'https://suzukimobilbandung.com/wp-content/uploads/2025/06/logo-suzuki-300x57.webp',
 }
 
 def get_input(label, old_value):

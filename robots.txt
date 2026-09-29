@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.suzukinaripan.com/sitemap.xml
+Sitemap: https://www.suzukimobilbandung.com/sitemap.xml

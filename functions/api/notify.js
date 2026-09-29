@@ -35,7 +35,7 @@ export async function onRequestPost(context) {
         method: 'POST',
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'Suzuki Mobil Bandung <onboarding@resend.dev>',
+          from: 'Suzuki Mobil Bandung <noreply@suzukimobilbandung.com>',
           to: [NOTIF_TO],
           subject,
           html: htmlBody,

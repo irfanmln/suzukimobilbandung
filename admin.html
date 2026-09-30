@@ -94,6 +94,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="login-title">Admin Dashboard</div>
     <input type="email" id="loginEmail" placeholder="Email" value="admin@suzukimobilbandung.com">
     <input type="password" id="loginPass" placeholder="Password">
+    <input type="password" id="loginToken" placeholder="API Token (dari Cloudflare Pages)">
     <button onclick="doLogin()">MASUK</button>
     <div class="login-err" id="loginErr">Email atau password salah.</div>
   </div>
@@ -349,7 +350,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 const API_BASE='/api';
-const ADMIN_TOKEN = localStorage.getItem('suzuki_admin_token') || '';
+let ADMIN_TOKEN = localStorage.getItem('suzuki_admin_token') || '';
+if(ADMIN_TOKEN){document.addEventListener('DOMContentLoaded',()=>{const t=document.getElementById('loginToken');if(t)t.value=ADMIN_TOKEN;});}
 const ADMIN_EMAIL='admin@suzukimobilbandung.com';
 const ADMIN_PASS='suzuki2026';
 const SALES_EMAIL='sales@suzukimobilbandung.com';
@@ -392,6 +394,8 @@ function r2keyFromUrl(imageUrl,marker){
 function doLogin(){
   const e=document.getElementById('loginEmail').value;
   const p=document.getElementById('loginPass').value;
+  const t=document.getElementById('loginToken').value.trim();
+  if(t){ADMIN_TOKEN=t;localStorage.setItem('suzuki_admin_token',t);}
   if(e===ADMIN_EMAIL&&p===ADMIN_PASS){
     currentRole='admin';
     applyRole();

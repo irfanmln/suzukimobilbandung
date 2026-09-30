@@ -84,7 +84,8 @@ for car_dir in sorted(SRC.iterdir()):
                 missing_hex.add(color)
                 hexv = '#999999'
             ext = f.suffix.lower()
-            dest = DST / slug / sanitize(f.stem + ext)
+            base = f'{group}-{f.stem}{ext}' if group else f'{f.stem}{ext}'
+            dest = DST / slug / sanitize(base)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(f, dest)
             n_files += 1

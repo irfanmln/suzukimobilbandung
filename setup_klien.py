@@ -46,7 +46,7 @@ OLD_VALUES = {
     'wa_number':    '6282218825857',
     'dealer_name':  'Suzuki Naripan Bandung',
     'dealer_addr':  'Jl. Naripan No.68, Kb. Pisang, Kec. Sumur Bandung, Kota Bandung, Jawa Barat 40112',
-    'dealer_email': 'iwansugianto882@gmail.com',
+    'dealer_email': 'iwansugianto2882@gmail.com',
     'dealer_phone': '+62 822-1882-5857',
     'logo_url':     'https://suzukimobilbandung.com/wp-content/uploads/2025/06/logo-suzuki-300x57.webp',
 }

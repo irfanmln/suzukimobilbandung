@@ -624,7 +624,7 @@ async function submitTestDrive(){
   const hp=document.getElementById('td_hp').value.trim();
   const mobil=document.getElementById('td_mobil').value;
   const hari=document.getElementById('td_hari').value;
-  if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}window.dataLayer=window.dataLayer||[];window.dataLayer.push({'event':'test_drive_submit'});
+  if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}if(window.gtag){gtag('event','test_drive_submit');}
   const btn=document.getElementById('tdBtn');
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
@@ -651,7 +651,7 @@ async function submitKredit(){
   const mobil=document.getElementById('kr_mobil').value;
   const tenor=document.getElementById('kr_tenor').value;
   const dp=document.getElementById('kr_dp').value;
-  if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}window.dataLayer=window.dataLayer||[];window.dataLayer.push({'event':'simulasi_kredit_submit'});
+  if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}if(window.gtag){gtag('event','simulasi_kredit_submit');}
   const btn=document.getElementById('krBtn');
   btn.disabled=true;btn.textContent='Mengirim...';
   try{

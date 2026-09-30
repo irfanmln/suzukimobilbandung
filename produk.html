@@ -337,7 +337,7 @@ async function submitTestDrive(){
   const mobil=document.getElementById('td_mobil').value;
   const hari=document.getElementById('td_hari').value;
   if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}
-  window.dataLayer=window.dataLayer||[];window.dataLayer.push({'event':'test_drive_submit'});
+  if(window.gtag){gtag('event','test_drive_submit');}
   const btn=document.getElementById('tdBtn');
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
@@ -353,7 +353,7 @@ async function submitKredit(){
   const nama=document.getElementById('kr_nama').value.trim();
   const hp=document.getElementById('kr_hp').value.trim();
   if(!nama||!hp){alert('Harap isi Nama dan No HP.');return;}
-  window.dataLayer=window.dataLayer||[];window.dataLayer.push({'event':'simulasi_kredit_submit'});
+  if(window.gtag){gtag('event','simulasi_kredit_submit');}
   const btn=document.getElementById('krBtn');
   btn.disabled=true;btn.textContent='Mengirim...';
   try{
